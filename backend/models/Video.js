@@ -8,10 +8,6 @@ const VideoSchema = new mongoose.Schema(
       trim: true,
       maxlength: 200,
     },
-    filename: {
-      type: String,
-      required: true,
-    },
     originalName: {
       type: String,
       required: true,
@@ -26,6 +22,19 @@ const VideoSchema = new mongoose.Schema(
     },
     duration: {
       type: Number,
+      default: null,
+    },
+    // Cloudinary fields
+    cloudinaryId: {
+      type: String,
+      required: true,
+    },
+    url: {
+      type: String,
+      required: true,
+    },
+    thumbnailUrl: {
+      type: String,
       default: null,
     },
   },

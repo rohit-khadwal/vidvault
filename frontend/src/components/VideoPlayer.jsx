@@ -8,14 +8,12 @@ function formatBytes(bytes) {
 export default function VideoPlayer({ video, onClose }) {
   const videoRef = useRef();
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  // Auto-play
   useEffect(() => {
     videoRef.current?.play().catch(() => {});
   }, []);
@@ -31,15 +29,15 @@ export default function VideoPlayer({ video, onClose }) {
         <video
           ref={videoRef}
           className="player-video"
-          src={getStreamUrl(video._id)}
+          src={getStreamUrl(video)}
           controls
-          controlsList="nodownload"
           playsInline
         />
 
         <div className="player-meta">
           <span>📁 {video.originalName}</span>
           <span>💾 {formatBytes(video.size)}</span>
+          {video.duration && <span>⏱ {Math.floor(video.duration / 60)}:{String(Math.floor(video.duration % 60)).padStart(2, '0')}</span>}
           <span>📅 {new Date(video.createdAt).toLocaleDateString()}</span>
         </div>
       </div>

@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState } from 'react';
-import { getStreamUrl } from '../api';
+import { useState } from 'react';
+import { getStreamUrl, getThumbnailUrl } from '../api';
 
 function formatBytes(bytes) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
@@ -16,40 +16,16 @@ function timeAgo(dateStr) {
 }
 
 export default function VideoCard({ video, onPlay, onDelete }) {
-  const videoRef = useRef();
-  const [thumbReady, setThumbReady] = useState(false);
-  const [thumbUrl, setThumbUrl] = useState(null);
-
-  // Generate thumbnail by loading video and snapping first frame
-  useEffect(() => {
-    const vid = document.createElement('video');
-    vid.src = getStreamUrl(video._id);
-    vid.crossOrigin = 'anonymous';
-    vid.muted = true;
-    vid.currentTime = 1;
-
-    vid.addEventListener('seeked', () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 320;
-      canvas.height = 180;
-      canvas.getContext('2d').drawImage(vid, 0, 0, 320, 180);
-      setThumbUrl(canvas.toDataURL('image/jpeg', 0.7));
-      setThumbReady(true);
-    });
-
-    vid.addEventListener('error', () => setThumbReady(true)); // show fallback
-    vid.load();
-  }, [video._id]);
+  const thumb = getThumbnailUrl(video);
+  const [imgError, setImgError] = useState(false);
 
   return (
     <div className="video-card" onClick={onPlay}>
       <div className="card-thumb">
-        {thumbUrl ? (
-          <img src={thumbUrl} alt={video.title} />
+        {thumb && !imgError ? (
+          <img src={thumb} alt={video.title} onError={() => setImgError(true)} />
         ) : (
-          <div className="thumb-placeholder">
-            <span>🎞️</span>
-          </div>
+          <div className="thumb-placeholder"><span>🎞️</span></div>
         )}
         <div className="play-overlay">
           <div className="play-btn">▶</div>
@@ -62,6 +38,12 @@ export default function VideoCard({ video, onPlay, onDelete }) {
           <span>{formatBytes(video.size)}</span>
           <span>·</span>
           <span>{timeAgo(video.createdAt)}</span>
+          {video.duration && (
+            <>
+              <span>·</span>
+              <span>{Math.floor(video.duration / 60)}:{String(Math.floor(video.duration % 60)).padStart(2, '0')}</span>
+            </>
+          )}
         </div>
       </div>
 
